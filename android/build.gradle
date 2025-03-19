@@ -8,7 +8,6 @@ def safeExtGet(prop, fallback) {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
 
 buildscript {
     if (project == rootProject) {
@@ -55,17 +54,5 @@ afterEvaluate { project ->
         classifier = 'sources'
         from android.sourceSets.main.java.srcDirs
         include '**/*.java'
-    }
-}
-
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId = "bang.svga.player"
-            artifactId = "react-native-svga-player"
-            version = "1.0"
-            artifact(androidSourcesJar)
-            artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
-        }
     }
 }
