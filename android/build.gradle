@@ -49,10 +49,9 @@ dependencies {
     implementation "com.github.yyued:SVGAPlayer-Android:$SVGAPLAYER_VERSION"
 }
 
-afterEvaluate { project ->
-    task androidSourcesJar(type: Jar) {
-        classifier = 'sources'
-        from android.sourceSets.main.java.srcDirs
-        include '**/*.java'
-    }
+// 定义源码打包任务（关键位置）
+task androidSourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+    include '**/*.java'
 }
