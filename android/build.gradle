@@ -60,8 +60,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.facebook.react:react-native:+'
-    implementation "com.github.yyued:SVGAPlayer-Android:$SVGAPLAYER_VERSION"
+    api 'com.facebook.react:react-native:+'
+    api "com.github.yyued:SVGAPlayer-Android:$SVGAPLAYER_VERSION"
 }
 
 def configureReactNativePom(def pom) {
@@ -97,7 +97,7 @@ afterEvaluate { project ->
         source = android.sourceSets.main.java.srcDirs
         classpath += files(android.bootClasspath)
         // 修复此行：
-        classpath += files(project.getConfigurations().getByName("runtimeClasspath").asList())
+        classpath += files(project.getConfigurations().getByName("compileClasspath").asList())
         include '**/*.java'
     }
 
