@@ -9,8 +9,7 @@ def safeExtGet(prop, fallback) {
 }
 
 apply plugin: 'com.android.library'
-//apply plugin: 'maven'
-apply plugin: 'maven-publish'  // 使用新版 Maven 插件
+apply plugin: 'maven-publish'
 
 buildscript {
     if (project == rootProject) {
@@ -19,22 +18,17 @@ buildscript {
             mavenCentral()
         }
         dependencies {
-            classpath 'com.android.tools.build:gradle:8.3.0' // 升级到 AGP 8.3.0
+            classpath 'com.android.tools.build:gradle:8.3.0' // AGP 8.3.0
         }
     }
 }
 
-apply plugin: 'com.android.library'
-//apply plugin: 'maven'
-apply plugin: 'maven-publish'  // 使用新版 Maven 插件
-
 android {
-    namespace "bang.svga.player" // 根据库的实际包名设置
-    compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
-    buildToolsVersion safeExtGet('buildToolsVersion', DEFAULT_BUILD_TOOLS_VERSION)
+    namespace "bang.svga.player" // 必须添加
+    compileSdk safeExtGet('compileSdk', DEFAULT_COMPILE_SDK)
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', DEFAULT_MIN_SDK_VERSION)
-        targetSdkVersion safeExtGet('targetSdkVersion', DEFAULT_TARGET_SDK_VERSION)
+        minSdk safeExtGet('minSdk', DEFAULT_MIN_SDK)
+        targetSdk safeExtGet('targetSdk', DEFAULT_TARGET_SDK)
         versionCode 1
         versionName "1.0"
     }
@@ -44,95 +38,36 @@ android {
 }
 
 repositories {
-    // ref: https://www.baeldung.com/maven-local-repository
     mavenLocal()
-    maven {
-        // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-        url "$rootDir/../node_modules/react-native/android"
-    }
-    maven {
-        // Android JSC is installed from npm
-        url "$rootDir/../node_modules/jsc-android/dist"
-    }
+    maven { url "$rootDir/../node_modules/react-native/android" }
+    maven { url "$rootDir/../node_modules/jsc-android/dist" }
     google()
     mavenCentral()
-	maven { url 'https://jitpack.io' }
-
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    api 'com.facebook.react:react-native:+'
-    api "com.github.yyued:SVGAPlayer-Android:$SVGAPLAYER_VERSION"
-}
-
-def configureReactNativePom(def pom) {
-    def packageJson = new groovy.json.JsonSlurper().parseText(file('../package.json').text)
-
-    pom.project {
-        name packageJson.title
-        artifactId packageJson.name
-        version = packageJson.version
-        group = "bang.svga.player"
-        description packageJson.description
-        url packageJson.repository.baseUrl
-
-        licenses {
-            license {
-                name packageJson.license
-                url packageJson.repository.baseUrl + '/blob/master/' + packageJson.licenseFilename
-                distribution 'repo'
-            }
-        }
-
-        developers {
-            developer {
-                id packageJson.author.username
-                name packageJson.author.name
-            }
-        }
-    }
+    implementation 'com.facebook.react:react-native:+'
+    implementation "com.github.yyued:SVGAPlayer-Android:$SVGAPLAYER_VERSION"
 }
 
 afterEvaluate { project ->
-    task androidJavadoc(type: Javadoc) {
-        source = android.sourceSets.main.java.srcDirs
-        classpath += files(android.bootClasspath)
-        // 关键修复：使用 runtimeClasspath
-        classpath += files(project.getConfigurations().getByName("runtimeClasspath").asList())
-        include '**/*.java'
-    }
-
-    task androidJavadocJar(type: Jar, dependsOn: androidJavadoc) {
-        classifier = 'javadoc'
-        from androidJavadoc.destinationDir
-    }
-
     task androidSourcesJar(type: Jar) {
         classifier = 'sources'
         from android.sourceSets.main.java.srcDirs
         include '**/*.java'
     }
+}
 
-    android.libraryVariants.all { variant ->
-        def name = variant.name.capitalize()
-        def javaCompileTask = variant.javaCompileProvider.get()
-
-        task "jar${name}"(type: Jar, dependsOn: javaCompileTask) {
-            from javaCompileTask.destinationDir
-        }
-    }
-
-    artifacts {
-        archives androidSourcesJar
-        archives androidJavadocJar
-    }
-
-    task installArchives(type: Upload) {
-        configuration = configurations.archives
-        repositories.mavenDeployer {
-            // Deploy to react-native-event-bridge/maven, ready to publish to npm
-            repository url: "file://${projectDir}/../android/maven"
-            configureReactNativePom pom
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = "bang.svga.player"
+            artifactId = "react-native-svga-player"
+            version = "1.0"
+            artifact(androidSourcesJar)
+            artifact(androidJavadocJar)
+            artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
         }
     }
 }
