@@ -1,15 +1,3 @@
-// android/build.gradle
-
-// based on:
-//
-// * https://github.com/facebook/react-native/blob/0.60-stable/template/android/build.gradle
-//   original location:
-//   - https://github.com/facebook/react-native/blob/0.58-stable/local-cli/templates/HelloWorld/android/build.gradle
-//
-// * https://github.com/facebook/react-native/blob/0.60-stable/template/android/app/build.gradle
-//   original location:
-//   - https://github.com/facebook/react-native/blob/0.58-stable/local-cli/templates/HelloWorld/android/app/build.gradle
-
 def DEFAULT_COMPILE_SDK_VERSION = 35
 def DEFAULT_BUILD_TOOLS_VERSION = '35.0.0'
 def DEFAULT_MIN_SDK_VERSION = 24
@@ -31,7 +19,7 @@ buildscript {
             mavenCentral()
         }
         dependencies {
-            classpath 'com.android.tools.build:gradle:7.0.4' // 升级插件版本
+            classpath 'com.android.tools.build:gradle:8.1.0' // 升级插件版本
         }
     }
 }
@@ -109,7 +97,7 @@ afterEvaluate { project ->
         source = android.sourceSets.main.java.srcDirs
         classpath += files(android.bootClasspath)
         // 修复此行：
-        classpath += files(project.getConfigurations().getByName("implementation").asList())
+        classpath += files(project.getConfigurations().getByName("runtimeClasspath").asList())
         include '**/*.java'
     }
 
