@@ -19,7 +19,7 @@ buildscript {
             mavenCentral()
         }
         dependencies {
-            classpath 'com.android.tools.build:gradle:8.1.0' // 升级插件版本
+            classpath 'com.android.tools.build:gradle:8.3.0' // 升级到 AGP 8.3.0
         }
     }
 }
@@ -29,6 +29,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'  // 使用新版 Maven 插件
 
 android {
+    namespace "bang.svga.player" // 根据库的实际包名设置
     compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
     buildToolsVersion safeExtGet('buildToolsVersion', DEFAULT_BUILD_TOOLS_VERSION)
     defaultConfig {
@@ -96,8 +97,8 @@ afterEvaluate { project ->
     task androidJavadoc(type: Javadoc) {
         source = android.sourceSets.main.java.srcDirs
         classpath += files(android.bootClasspath)
-        // 修复此行：
-        classpath += files(project.getConfigurations().getByName("implementation").asList())
+        // 关键修复：使用 runtimeClasspath
+        classpath += files(project.getConfigurations().getByName("runtimeClasspath").asList())
         include '**/*.java'
     }
 
